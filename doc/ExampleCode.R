@@ -1,0 +1,212 @@
+## ----setup, include=FALSE------------------------------------------------
+knitr::opts_chunk$set(echo = TRUE)
+
+## ----echo=FALSE, warning=FALSE, message=FALSE----------------------------
+# install.packages("nmfADMM_1.0.tar.gz", repos = NULL, type="source")
+library(nmfADMM)
+library(NMF)
+set.seed(1984)
+
+## ------------------------------------------------------------------------
+m <- n <- 1000   # Input size m x n
+k = 15          # Rank k approximation
+FIXiter = 100   # Fixed the number of iterations for comparison
+df = data.frame()
+
+X = matrix(abs(rnorm(n=m*n)), m, n) # A random matrix
+sqt = sum(X^2)
+
+# Kmeans
+t0=proc.time()
+vc = kmeans(t(X),centers=k)
+t1=proc.time()
+
+erk = 0
+for (i in 1:k) {
+  erk = erk + sum(apply(X[, vc$cluster==i], 2,
+                        function(x) sum((x-vc$centers[i, ])^2)))
+}
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = erk/sqt,
+                        Method="Kmeans"))
+
+# Standard NMF using package "NMF"
+t0=proc.time()
+def = nmf(X, k, method="lee", nrun=1, maxIter=FIXiter)
+t1=proc.time()
+Xp = def@fit@W %*% def@fit@H
+err0 = sum((Xp-X)^2)/sqt
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = err0,
+                        Method="StandardNMF"))
+
+# Convex NMF using ADMM
+rc = (1:n)%%k # Random starting cluster assignment
+t0=proc.time()
+res = ConvexNMF_ADMM(X,k,rc,
+                     fixediter=FIXiter,
+                     verbose=0)
+t1=proc.time()
+Xp = X %*% res$W %*% res$G
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = sum((Xp-X)^2)/sqt,
+                        Method="ConvexADMM"))
+
+# Symmetric NMF using ADMM (single input version)
+t0=proc.time()
+res = SymNMF_ADMM(V=X,k=k,cluster=rc,
+                  fixediter=FIXiter,verbose=0)
+t1=proc.time()
+Xp = res$W %*% t(res$G)
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = sum((Xp-X)^2)/sqt,
+                        Method="SymNMFADMM"))
+row.names(df) = NULL
+df
+
+## ------------------------------------------------------------------------
+m <- n <- 500   # Input size n x n
+k = 10           # Rank k approximation
+FIXiter = 100   # Fixed the number of iteration for comparison
+C = matrix(abs(rnorm(n=m*n)),n,m)
+X = C %*% t(C)
+sub = round(n/k)
+for (j in 1:(k-1)) {
+  st=(j-1)*sub+1
+  ed=j*sub
+  X[st:ed, st:ed] = X[st:ed, st:ed] * (1+runif(1,0.1,2))
+}
+st = (k-1)*sub+1
+ed = n
+X[st:ed, st:ed] = X[st:ed, st:ed] * (1+runif(1,0.1,2))
+sqt = sum(X^2)
+
+## ----echo = FALSE--------------------------------------------------------
+df = data.frame()
+# Kmeans
+t0=proc.time()
+vc = kmeans(t(X),centers=k)
+t1=proc.time()
+
+erk = 0
+for (i in 1:k) {
+  erk = erk + sum(apply(X[, vc$cluster==i], 2,
+                        function(x) sum((x-vc$centers[i, ])^2)))
+}
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = erk/sqt,
+                        Method="Kmeans"))
+
+# Standard NMF using package "NMF"
+t0=proc.time()
+def = nmf(X, k, method="lee", nrun=1, maxIter=FIXiter)
+t1=proc.time()
+Xp = def@fit@W %*% def@fit@H
+err0 = sum((Xp-X)^2)/sqt
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = err0,
+                        Method="StandardNMF"))
+
+# Convex NMF using ADMM
+rc = (1:n)%%k
+t0=proc.time()
+res = ConvexNMF_ADMM(X,k,rc,
+                     fixediter=FIXiter,
+                     verbose=0)
+t1=proc.time()
+Xp = X %*% res$W %*% res$G
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = sum((Xp-X)^2)/sqt,
+                        Method="ConvexADMM"))
+
+# Symmetric NMF using ADMM (single input version)
+t0=proc.time()
+res = SymNMF_ADMM(V=X,k=k,cluster=rc,
+                  fixediter=FIXiter*2,verbose=0)
+t1=proc.time()
+Xp = res$W %*% t(res$G)
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = sum((Xp-X)^2)/sqt,
+                        Method="SymNMFADMM"))
+row.names(df) = NULL
+df
+
+## ----echo = FALSE--------------------------------------------------------
+simul.mv.gmm <- function(n, lambdas, mus, covs) {
+    k   <- length(lambdas)          # k is the number of components
+    d   <- nrow(mus)                # d is the dimension of data
+    stopifnot(k == ncol(mus))
+    cov.chol = chol(covs)
+    z  <- apply(rmultinom(n, 1, lambdas), 2, which.max)
+    xi <- matrix(rnorm(n*d), d, n)
+    x  <- matrix(NA, d, n)
+    for(i in 1:n) {
+        x[,i] <- (xi[,i] %*% cov.chol) + mus[,z[i]]
+    }
+    return(list(x=x,z=z))
+}
+
+
+## ------------------------------------------------------------------------
+m <- 100
+n <- 500        # Input size m x n
+k = 10           # k components with differnet mean
+FIXiter = 100   # Fixed the number of iteration for comparison
+C = matrix(rnorm(n=m*m),m,m) # Same covariance matrix
+CC = cov2cor(C %*% t(C))
+sim=simul.mv.gmm(n, rep(1, k), matrix((1:k),m,k,byrow=T), CC)
+X = abs(sim$x)
+sqt = sum(X^2)
+
+## ----echo = FALSE--------------------------------------------------------
+df = data.frame()
+# Kmeans
+t0=proc.time()
+vc = kmeans(t(X),centers=k)
+t1=proc.time()
+
+erk = 0
+for (i in 1:k) {
+  erk = erk + sum(apply(X[, vc$cluster==i], 2,
+                        function(x) sum((x-vc$centers[i, ])^2)))
+}
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = erk/sqt,
+                        Method="Kmeans"))
+
+# Standard NMF using package "NMF"
+t0=proc.time()
+def = nmf(X, k, method="lee", nrun=1, maxIter=FIXiter)
+t1=proc.time()
+Xp = def@fit@W %*% def@fit@H
+err0 = sum((Xp-X)^2)/sqt
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = err0,
+                        Method="StandardNMF"))
+
+# Convex NMF using ADMM
+rc = (1:n)%%k
+t0=proc.time()
+res = ConvexNMF_ADMM(X,k,rc,
+                     fixediter=FIXiter,
+                     verbose=0)
+t1=proc.time()
+Xp = X %*% res$W %*% res$G
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = sum((Xp-X)^2)/sqt,
+                        Method="ConvexADMM"))
+
+row.names(df) = NULL
+df
+
