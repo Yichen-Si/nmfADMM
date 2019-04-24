@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Example simulation code for testing nmfADMM
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-# nstall.packages("nmfADMM_1.0.tar.gz", repos = NULL, type="source")
+# install.packages("nmfADMM_1.0.tar.gz", repos = NULL, type="source")
 library(nmfADMM)
 library(NMF)
 set.seed(1984)
