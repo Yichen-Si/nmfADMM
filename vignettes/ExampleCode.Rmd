@@ -15,14 +15,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Example simulation code for testing nmfADMM
 
-```{r echo=FALSE}
-install.packages("nmfADMM_1.0.tar.gz", repos = NULL, type="source")
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# nstall.packages("nmfADMM_1.0.tar.gz", repos = NULL, type="source")
 library(nmfADMM)
 library(NMF)
 set.seed(1984)
 ```
 
-1. Simulate asymmetric completely random non-negative matrix. 
+1. Simulate asymmetric completely random non-negative matrix.
 ```{r}
 m <- n <- 1000   # Input size m x n
 k = 15          # Rank k approximation
@@ -47,9 +47,9 @@ df=rbind(df, data.frame(n=n, m=m, k=k,
                         RelErr = erk/sqt,
                         Method="Kmeans"))
 
-# Standard NMF using package "NMF" 
+# Standard NMF using package "NMF"
 t0=proc.time()
-def = nmf(X, k, method="lee", nrun=1, maxIter=FIXiter) 
+def = nmf(X, k, method="lee", nrun=1, maxIter=FIXiter)
 t1=proc.time()
 Xp = def@fit@W %*% def@fit@H
 err0 = sum((Xp-X)^2)/sqt
@@ -59,7 +59,7 @@ df=rbind(df, data.frame(n=n, m=m, k=k,
                         Method="StandardNMF"))
 
 # Convex NMF using ADMM
-rc = (1:n)%%k # Random starting cluster assignment 
+rc = (1:n)%%k # Random starting cluster assignment
 t0=proc.time()
 res = ConvexNMF_ADMM(X,k,rc,
                      fixediter=FIXiter,
@@ -85,7 +85,7 @@ row.names(df) = NULL
 df
 ```
 
-2. Simulate symmetric block diagonal matrix. 
+2. Simulate symmetric block diagonal matrix.
 ```{r}
 m <- n <- 500   # Input size n x n
 k = 10           # Rank k approximation
@@ -122,9 +122,9 @@ df=rbind(df, data.frame(n=n, m=m, k=k,
                         RelErr = erk/sqt,
                         Method="Kmeans"))
 
-# Standard NMF using package "NMF" 
+# Standard NMF using package "NMF"
 t0=proc.time()
-def = nmf(X, k, method="lee", nrun=1, maxIter=FIXiter) 
+def = nmf(X, k, method="lee", nrun=1, maxIter=FIXiter)
 t1=proc.time()
 Xp = def@fit@W %*% def@fit@H
 err0 = sum((Xp-X)^2)/sqt
@@ -185,7 +185,7 @@ m <- 100
 n <- 500        # Input size m x n
 k = 10           # k components with differnet mean
 FIXiter = 100   # Fixed the number of iteration for comparison
-C = matrix(rnorm(n=m*m),m,m) # Same covariance matrix 
+C = matrix(rnorm(n=m*m),m,m) # Same covariance matrix
 CC = cov2cor(C %*% t(C))
 sim=simul.mv.gmm(n, rep(1, k), matrix((1:k),m,k,byrow=T), CC)
 X = abs(sim$x)
@@ -210,9 +210,9 @@ df=rbind(df, data.frame(n=n, m=m, k=k,
                         RelErr = erk/sqt,
                         Method="Kmeans"))
 
-# Standard NMF using package "NMF" 
+# Standard NMF using package "NMF"
 t0=proc.time()
-def = nmf(X, k, method="lee", nrun=1, maxIter=FIXiter) 
+def = nmf(X, k, method="lee", nrun=1, maxIter=FIXiter)
 t1=proc.time()
 Xp = def@fit@W %*% def@fit@H
 err0 = sum((Xp-X)^2)/sqt
