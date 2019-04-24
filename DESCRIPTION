@@ -1,0 +1,12 @@
+Package: nmfADMM
+Type: Package
+Title: Flexible NMF using ADMM
+Version: 1.0
+Date: 2019-04-23
+Author: Yichen Si
+Maintainer: Yichen Si <ycsi@umich.edu>
+Description: This package implemented a couple of NMF variations using ADMM framework.
+License: GPL-3
+Imports: Rcpp (>= 1.0.0)
+LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 6.1.1
