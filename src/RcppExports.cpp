@@ -24,6 +24,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// NMF_ADMM
+List NMF_ADMM(arma::mat& V, int k, arma::uvec cluster, std::string dist, bool verbose, int maxiter, int fixediter, double rho, double tol);
+RcppExport SEXP _nmfADMM_NMF_ADMM(SEXP VSEXP, SEXP kSEXP, SEXP clusterSEXP, SEXP distSEXP, SEXP verboseSEXP, SEXP maxiterSEXP, SEXP fixediterSEXP, SEXP rhoSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type V(VSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< arma::uvec >::type cluster(clusterSEXP);
+    Rcpp::traits::input_parameter< std::string >::type dist(distSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
+    Rcpp::traits::input_parameter< int >::type fixediter(fixediterSEXP);
+    Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(NMF_ADMM(V, k, cluster, dist, verbose, maxiter, fixediter, rho, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
 // SymNMFs_ADMM
 List SymNMFs_ADMM(arma::mat& Vp, arma::mat& Vm, int k, arma::uvec cluster, std::string dist, bool verbose, int maxiter, int fixediter, double rho, double tol);
 RcppExport SEXP _nmfADMM_SymNMFs_ADMM(SEXP VpSEXP, SEXP VmSEXP, SEXP kSEXP, SEXP clusterSEXP, SEXP distSEXP, SEXP verboseSEXP, SEXP maxiterSEXP, SEXP fixediterSEXP, SEXP rhoSEXP, SEXP tolSEXP) {
@@ -66,6 +85,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_nmfADMM_ConvexNMF_ADMM", (DL_FUNC) &_nmfADMM_ConvexNMF_ADMM, 8},
+    {"_nmfADMM_NMF_ADMM", (DL_FUNC) &_nmfADMM_NMF_ADMM, 9},
     {"_nmfADMM_SymNMFs_ADMM", (DL_FUNC) &_nmfADMM_SymNMFs_ADMM, 10},
     {"_nmfADMM_SymNMF_ADMM", (DL_FUNC) &_nmfADMM_SymNMF_ADMM, 9},
     {NULL, NULL, 0}

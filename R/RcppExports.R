@@ -24,6 +24,31 @@ ConvexNMF_ADMM <- function(V, k, cluster, verbose = 0L, maxiter = 100L, fixedite
     .Call(`_nmfADMM_ConvexNMF_ADMM`, V, k, cluster, verbose, maxiter, fixediter, rho, tol)
 }
 
+#' Standard NMF implemented in ADMM
+#'
+#' This function implements a ADMM for standard NMF:
+#' V ~ WG^t with V, W & G non-negative.
+#'
+#' @param V         A (m x n) non-negative matrix
+#'                  in the original data matrix.
+#' @param k         An integer to specify desired rank of the low rank factorization result
+#' @param cluster   A (k x 1) vector of integer 0~(k-1) indicating initial cluster assignment
+#' @param dist      A string indicating the distance measure (default: "F2").
+#' Currently only "F2", for Euclidean distance and "KL" for KL divergence are implemented
+#' @param verbose   A 0/1 integer (default 0). If 1: output the relative error after each iteration
+#' @param maxiter   An integer (default 100) for the maximal number of iterations
+#' @param fixediter An integer (optional) for a fixed number of iterations
+#' @param rho       Penalty parameter in ADMM (default 3)
+#' @param tol       Tolerance parameter to declare convergence
+#' @return A list containing the following values
+#' * W      : A (m x k) non-negative matrix containing W in V ~ WG^t
+#' * G      : A (n x k) non-negative matrix containing G in V ~ WG^t
+#' * Error  : A vector containing the relative distance of this approximation in each iteration
+#' @export
+NMF_ADMM <- function(V, k, cluster, dist = "F2", verbose = 0L, maxiter = 100L, fixediter = 0L, rho = 3, tol = 1e-3) {
+    .Call(`_nmfADMM_NMF_ADMM`, V, k, cluster, dist, verbose, maxiter, fixediter, rho, tol)
+}
+
 #' Joint symmetric NMF for multiple input matricies using ADMM
 #'
 #' This function implements a ADMM for NMF taking two n x n matrices.
