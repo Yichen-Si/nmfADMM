@@ -241,8 +241,20 @@ df=rbind(df, data.frame(n=n, m=m, k=k,
                         RelErr = err0,
                         Method=&quot;StandardNMF&quot;))
 
-# Convex NMF using ADMM
 rc = (1:n)%%k # Random starting cluster assignment
+
+# Standard NMF using ADMM
+t0=proc.time()
+res = NMF_ADMM(X, k, rc,
+               fixediter=FIXiter, verbose=0)
+t1=proc.time()
+Xp = res$W %*% t(res$G)
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = sum((Xp-X)^2)/sqt,
+                        Method=&quot;StandardNMF_ADMM&quot;))
+
+# Convex NMF using ADMM
 t0=proc.time()
 res = ConvexNMF_ADMM(X,k,rc,
                      fixediter=FIXiter,
@@ -268,11 +280,12 @@ row.names(df) = NULL
 df
 </code></pre>
 
-<pre><code>##      n    m  k   Time    RelErr      Method
-## 1 1000 1000 15  2.120 0.3529008      Kmeans
-## 2 1000 1000 15 22.822 0.3497237 StandardNMF
-## 3 1000 1000 15  6.539 0.3434659  ConvexADMM
-## 4 1000 1000 15  4.059 0.3475494  SymNMFADMM
+<pre><code>##      n    m  k   Time    RelErr           Method
+## 1 1000 1000 15  2.079 0.3529008           Kmeans
+## 2 1000 1000 15 22.231 0.3497237      StandardNMF
+## 3 1000 1000 15  4.249 0.3525956 StandardNMF_ADMM
+## 4 1000 1000 15  6.474 0.3434599       ConvexADMM
+## 5 1000 1000 15  3.690 0.3475082       SymNMFADMM
 </code></pre>
 
 <ol>
@@ -296,11 +309,12 @@ X[st:ed, st:ed] = X[st:ed, st:ed] * (1+runif(1,0.1,2))
 sqt = sum(X^2)
 </code></pre>
 
-<pre><code>##     n   m  k  Time      RelErr      Method
-## 1 500 500 10 0.034 0.026781625      Kmeans
-## 2 500 500 10 2.383 0.005558319 StandardNMF
-## 3 500 500 10 1.346 0.002752426  ConvexADMM
-## 4 500 500 10 1.532 0.003003668  SymNMFADMM
+<pre><code>##     n   m  k  Time      RelErr           Method
+## 1 500 500 10 0.031 0.020712506           Kmeans
+## 2 500 500 10 2.367 0.004610949      StandardNMF
+## 3 500 500 10 0.852 0.002609389 StandardNMF_ADMM
+## 4 500 500 10 1.329 0.002606946       ConvexADMM
+## 5 500 500 10 1.519 0.002869851       SymNMFADMM
 </code></pre>
 
 <ol>
@@ -318,10 +332,11 @@ X = abs(sim$x)
 sqt = sum(X^2)
 </code></pre>
 
-<pre><code>##     n   m  k  Time     RelErr      Method
-## 1 500 100 10 0.007 0.02527619      Kmeans
-## 2 500 100 10 0.678 0.02091650 StandardNMF
-## 3 500 100 10 0.358 0.01680602  ConvexADMM
+<pre><code>##     n   m  k  Time     RelErr           Method
+## 1 500 100 10 0.007 0.02972623           Kmeans
+## 2 500 100 10 0.662 0.02059445      StandardNMF
+## 3 500 100 10 0.164 0.02120255 StandardNMF_ADMM
+## 4 500 100 10 0.357 0.01659665       ConvexADMM
 </code></pre>
 
 </body>

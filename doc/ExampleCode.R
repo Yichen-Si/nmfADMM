@@ -42,8 +42,20 @@ df=rbind(df, data.frame(n=n, m=m, k=k,
                         RelErr = err0,
                         Method="StandardNMF"))
 
-# Convex NMF using ADMM
 rc = (1:n)%%k # Random starting cluster assignment
+
+# Standard NMF using ADMM
+t0=proc.time()
+res = NMF_ADMM(X, k, rc,
+               fixediter=FIXiter, verbose=0)
+t1=proc.time()
+Xp = res$W %*% t(res$G)
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = sum((Xp-X)^2)/sqt,
+                        Method="StandardNMF_ADMM"))
+
+# Convex NMF using ADMM
 t0=proc.time()
 res = ConvexNMF_ADMM(X,k,rc,
                      fixediter=FIXiter,
@@ -113,8 +125,19 @@ df=rbind(df, data.frame(n=n, m=m, k=k,
                         RelErr = err0,
                         Method="StandardNMF"))
 
-# Convex NMF using ADMM
 rc = (1:n)%%k
+# Standard NMF using ADMM
+t0=proc.time()
+res = NMF_ADMM(X, k, rc,
+               fixediter=FIXiter, verbose=0)
+t1=proc.time()
+Xp = res$W %*% t(res$G)
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = sum((Xp-X)^2)/sqt,
+                        Method="StandardNMF_ADMM"))
+
+# Convex NMF using ADMM
 t0=proc.time()
 res = ConvexNMF_ADMM(X,k,rc,
                      fixediter=FIXiter,
@@ -194,8 +217,19 @@ df=rbind(df, data.frame(n=n, m=m, k=k,
                         RelErr = err0,
                         Method="StandardNMF"))
 
-# Convex NMF using ADMM
 rc = (1:n)%%k
+# Standard NMF using ADMM
+t0=proc.time()
+res = NMF_ADMM(X, k, rc,
+               fixediter=FIXiter, verbose=0)
+t1=proc.time()
+Xp = res$W %*% t(res$G)
+df=rbind(df, data.frame(n=n, m=m, k=k,
+                        Time=(t1-t0)[3],
+                        RelErr = sum((Xp-X)^2)/sqt,
+                        Method="StandardNMF_ADMM"))
+
+# Convex NMF using ADMM
 t0=proc.time()
 res = ConvexNMF_ADMM(X,k,rc,
                      fixediter=FIXiter,
